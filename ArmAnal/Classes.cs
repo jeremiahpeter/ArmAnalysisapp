@@ -4,21 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace URCarmApp
+namespace URCarmAppPhysicsClasses
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Linq;
-    using System.Runtime.CompilerServices;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
-    using System.Windows.Forms.VisualStyles;
-    using System.Xml.Schema;
-    using URCarmApp.ArmAnalysisApp;
-    namespace ArmAnalysisApp
-    {
+    
         internal class bar
         {
             public double RAX = 0;
@@ -49,7 +37,8 @@ namespace URCarmApp
             public double percentconnect = 0;
             public double intervals = 100;
             public important_numbers Solutions = new important_numbers(1, 2, 3, 4, 5, 6, 7, 8);
-            public PistonLever
+            public List<double> ActuatorForcesList = new List<double>();
+        public PistonLever
                 (
                 double pistonmindistance,
                 double pistonmaxdistance,
@@ -76,15 +65,17 @@ namespace URCarmApp
                 this.ActuatorWeight = actuatorweight * 9.81;
                 this.barWeight = weight * 9.81;
                 this.AppliedForce = AppliedForce;
-                this.percentconnect = percentconnect;
+                
                 this.intervals = intervals;
                 this.Solutions = new important_numbers(pistonmindistance, pistonmaxdistance, 0, 0, 0, 0, 0, 0);
-            }
+                System.Diagnostics.Debug.WriteLine("Piston Lever Initialized");
+        }
             public void CalculateAngles(double CurrentPistonLength)
             {
-                this.Angles["StationaryLink"] = Math.Acos(Math.Pow(this.LinkHeight, 2) + Math.Pow(this.LinkLength, 2) - Math.Pow(CurrentPistonLength, 2) / (2 * this.LinkHeight * this.LinkLength));
-                this.Angles["StationaryPiston"] = Math.Acos(Math.Pow(this.LinkHeight, 2) + Math.Pow(CurrentPistonLength, 2) - Math.Pow(this.LinkLength, 2) / (2 * this.LinkHeight * CurrentPistonLength));
-                this.Angles["LinkPiston"] = Math.PI * 0.5 - this.Angles["StationaryLink"] - this.Angles["StationaryPiston"];
+                this.Angles["StationaryLink"] = Math.Acos(Math.Pow(this.LinkHeight, 2) + Math.Pow(this.LinkLength * this.PercentConnect, 2) - Math.Pow(CurrentPistonLength, 2) / (2 * this.LinkHeight * this.LinkLength * this.PercentConnect));
+            this.Angles["StationaryPiston"] = Math.Acos((this.LinkHeight * this.LinkHeight + CurrentPistonLength * CurrentPistonLength - this.LinkLength * this.LinkLength * this.PercentConnect * this.PercentConnect) / (2 * this.LinkHeight * CurrentPistonLength));
+            this.Angles["LinkPiston"] = Math.Abs(Math.PI - this.Angles["StationaryLink"] - this.Angles["StationaryPiston"]);
+                System.Diagnostics.Debug.WriteLine($"Angles - StationaryLink: {this.Angles["StationaryLink"]}, StationaryPiston: {this.Angles["StationaryPiston"]}, LinkPiston: {this.Angles["LinkPiston"]}");
             }
             public Dictionary<string, double> Order_66()
             {
@@ -96,14 +87,16 @@ namespace URCarmApp
                     double length = this.PistonMinDistance + (i * (this.PistonMaxDistance - this.PistonMinDistance) / this.intervals);
                     this.CalculateAngles(length);
                     link LinearActuatorReactions = new link(this.LinkLength, this.Angles["StationaryPiston"], this.ActuatorWeight);
-                    Console.WriteLine($"reactions: RAX: {LinearActuatorReactions.RAX}, RAY: {LinearActuatorReactions.RAY}, RBX: {LinearActuatorReactions.RBX}, RBY: {LinearActuatorReactions.RBY}");
+                    System.Diagnostics.Debug.WriteLine($"reactions: RAX: {LinearActuatorReactions.RAX}, RAY: {LinearActuatorReactions.RAY}, RBX: {LinearActuatorReactions.RBX}, RBY: {LinearActuatorReactions.RBY}");
                     double Force = this.CalculateActuatorForce(this.barWeight, LinearActuatorReactions.RBY, this.AppliedForce, LinearActuatorReactions.RBX, this.LinkLength, this.LinkLength * this.percentconnect, Math.PI * 0.5 - this.Angles["StationaryLink"], 0.5);
-                    Console.WriteLine($"Force: {Force} at Length: {length}, for iteration {i}");
-                    if (Force > this.MaxAllowableForce && !foundmax)
+                    System.Diagnostics.Debug.WriteLine($"Force: {Force} at Length: {length}, for iteration {i}");
+                    this.ActuatorForcesList.Add(Force);
+                if (Force > this.MaxAllowableForce && !foundmax)
                     {
+                        foundmax = true;
                         this.Solutions.MaxF = Force;
                         this.Solutions.AngleMax = this.Angles["StationaryPiston"];
-                        this.Solutions.HeightMax = this.LinkLength * Math.Sin(this.Angles["Stationarylink"]);
+                        this.Solutions.HeightMax = this.LinkLength * Math.Sin(this.Angles["StationaryLink"]);
                         return_dict.Add("MinLength", length);
                     }
                     if (Force < 0)
@@ -117,9 +110,9 @@ namespace URCarmApp
                 }
                 if (!foundmax)
                 {
-                    Console.WriteLine("MinLength not bounded");
+                    System.Diagnostics.Debug.WriteLine("MinLength not bounded");
                     return_dict.Add("MinLength", this.PistonMinDistance);
-                    Console.WriteLine($"MinLength {this.PistonMaxDistance}");
+                    System.Diagnostics.Debug.WriteLine($"MinLength {this.PistonMaxDistance}");
 
                     this.CalculateAngles(this.PistonMinDistance);
                     link first_reaction = new link(this.LinkLength, this.Angles["StationaryPiston"], this.ActuatorWeight);
@@ -131,12 +124,12 @@ namespace URCarmApp
                 }
                 if (!foundmin)
                 {
-                    Console.WriteLine("MaxLength not bounded");
+                    System.Diagnostics.Debug.WriteLine("MaxLength not bounded");
                     return_dict.Add("MaxLength", this.PistonMaxDistance);
-                    Console.WriteLine($"MaxLength {this.PistonMaxDistance}");
+                    System.Diagnostics.Debug.WriteLine($"MaxLength {this.PistonMaxDistance}");
                     this.CalculateAngles(this.PistonMaxDistance);
                     link last_reaction = new link(this.LinkLength, this.Angles["StationaryPiston"], this.ActuatorWeight);
-                    double InnitForce = this.CalculateActuatorForce(this.barWeight, last_reaction.RBY, this.AppliedForce, last_reaction.RBX, this.LinkLength, this.LinkLength * this.percentconnect, Math.PI * 0.5 - this.Angles["StationaryLink"], 0.5);
+                    double InnitForce = this.CalculateActuatorForce(this.barWeight, last_reaction.RBY, this.AppliedForce, last_reaction.RBX, this.LinkLength, this.LinkLength * this.percentconnect, this.Angles["StationaryLink"], 0.5);
                     this.Solutions.MinF = InnitForce;
                     this.Solutions.AngleMin = this.Angles["StationaryPiston"];
                     this.Solutions.HeightMin = this.LinkLength * Math.Sin(Math.PI * 0.5 - this.Angles["StationaryLink"]);
@@ -148,7 +141,7 @@ namespace URCarmApp
             {
                 double I = 0.3333 * L * L * Fwl / 9.81;
                 bar bar1 = new bar(Fwl, Fcy, Fd, Fxc, L, lp, angle, I * expected_acceleration);
-                Console.WriteLine("Sucessfully calculated actuator force");
+                System.Diagnostics.Debug.WriteLine("Sucessfully calculated actuator force");
                 return Math.Sqrt(bar1.RFX * bar1.RFX + bar1.RFY * bar1.RFY);
             }
         }
@@ -165,6 +158,7 @@ namespace URCarmApp
                 this.RAY = weight - this.RBY;
                 this.RBX = (Math.Sin(angle) * weight * length * 0.5 - this.RBY * length * Math.Sin(angle)) / (length * Math.Sin(angle));
                 this.RAX = -this.RBX;
+                
             }
         }
     }
@@ -192,14 +186,14 @@ namespace URCarmApp
         }
         public void Print()
         {
-            Console.WriteLine($"PistonMinDistance: {this.PistonMinDistance}");
-            Console.WriteLine($"PistonMaxDistance: {this.PistonMaxDistance}");
-            Console.WriteLine($"MaxF: {this.MaxF}");
-            Console.WriteLine($"MinF: {this.MinF}");
-            Console.WriteLine($"AngleMax: {this.AngleMax}");
-            Console.WriteLine($"AngleMin: {this.AngleMin}");
-            Console.WriteLine($"HeightMax: {this.HeightMax}");
-            Console.WriteLine($"HeightMin: {this.HeightMin}");
+            System.Diagnostics.Debug.WriteLine($"PistonMinDistance: {this.PistonMinDistance}");
+            System.Diagnostics.Debug.WriteLine($"PistonMaxDistance: {this.PistonMaxDistance}");
+            System.Diagnostics.Debug.WriteLine($"MaxF: {this.MaxF}");
+            System.Diagnostics.Debug.WriteLine($"MinF: {this.MinF}");
+            System.Diagnostics.Debug.WriteLine($"AngleMax: {this.AngleMax}");
+            System.Diagnostics.Debug.WriteLine($"AngleMin: {this.AngleMin}");
+            System.Diagnostics.Debug.WriteLine($"HeightMax: {this.HeightMax}");
+            System.Diagnostics.Debug.WriteLine($"HeightMin: {this.HeightMin}");
         }
     }
-}
+
