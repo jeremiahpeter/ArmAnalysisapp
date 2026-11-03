@@ -9,6 +9,8 @@ namespace ArmAnal
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
+        [DllImport("ArmAnal.dll", EntryPoint = "Check", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void Check();
         static void Main()
         {
             
@@ -16,15 +18,9 @@ namespace ArmAnal
             Application.Run(new Form1());
             Check();
             
-
-
         }
 
-        [DllImport("ArmAnal.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern void Check() ; 
-
-
-
+        
 
     }
 }
