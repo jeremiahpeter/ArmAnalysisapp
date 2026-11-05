@@ -20,7 +20,6 @@ namespace ArmAnal
             //double MaxActuatorLength, double MinActuatorLength, double ArmLength, double ArmConnectLength, double Height, double offset, int iterations, double appliedforce, double armweight, double accel, double actuatorWeight
             
 
-            System.Diagnostics.Debug.WriteLine($"Force {max}");
         }
     }
 }
