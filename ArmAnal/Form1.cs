@@ -2,14 +2,35 @@ namespace ArmAnal
 {
     public partial class Form1 : Form
     {
+        private List<Button> buttons;
+        private List<Panel> displayPanels;
+        
         public Form1()
         {
             InitializeComponent();
-            
+            buttons = new List<Button> { };
+            displayPanels = new List<Panel> { ForcesInputPanel, DimensionInputPanel };
         }
 
-        
-        
+        private void clearDisplayPanels()
+        {
+            foreach (var panel in displayPanels)
+            {
+                panel.Visible = false;
+            }
+        }
+
+        private void clearDisplayPanelsExcept(Panel exceptPanel)
+        {
+            foreach (var panel in displayPanels)
+            {
+                if (panel != exceptPanel)
+                {
+                    panel.Visible = false;
+                }
+            }
+        }
+
         private void DarkModeCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             if (DarkModeCheckBox.Checked)
@@ -26,26 +47,14 @@ namespace ArmAnal
 
         private void DimensionsInputPanelButton_Click(object sender, EventArgs e)
         {
-            if (DimensionInputPanel.Visible == true)
-            {
-                DimensionInputPanel.Visible = false;
-            }
-            else
-            {
-                DimensionInputPanel.Visible = true;
-            }
+            clearDisplayPanelsExcept(DimensionInputPanel);
+            DimensionInputPanel.Visible = !DimensionInputPanel.Visible;
         }
 
         private void ForcesInputPanelButton_Click(object sender, EventArgs e)
         {
-            if (ForcesInputPanel.Visible == true)
-            {
-                ForcesInputPanel.Visible = false;
-            }
-            else
-            {
-                ForcesInputPanel.Visible = true;
-            }
+            clearDisplayPanelsExcept(ForcesInputPanel);
+            ForcesInputPanel.Visible = !ForcesInputPanel.Visible;
         }
 
         private void RunPanelButton_Click(object sender, EventArgs e)
@@ -179,6 +188,11 @@ namespace ArmAnal
         }
 
         private void ForcesInputPanel_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void cwllthisbutton_Click(object sender, EventArgs e)
         {
 
         }
