@@ -58,6 +58,9 @@ namespace ArmAnal
             Label_MaxActuatorForce = new Label();
             MaxActuatorForceInput = new TextBox();
             cwllthisbutton = new Button();
+            txtConsole = new TextBox();
+            txtSayHello = new Button();
+            errorButton = new Button();
             DimensionInputPanel.SuspendLayout();
             ForcesInputPanel.SuspendLayout();
             SuspendLayout();
@@ -378,11 +381,43 @@ namespace ArmAnal
             cwllthisbutton.UseVisualStyleBackColor = true;
             cwllthisbutton.Click += cwllthisbutton_Click;
             // 
+            // txtConsole
+            // 
+            txtConsole.Location = new Point(14, 443);
+            txtConsole.Multiline = true;
+            txtConsole.Name = "txtConsole";
+            txtConsole.Size = new Size(634, 213);
+            txtConsole.TabIndex = 14;
+            txtConsole.TextChanged += txtConsole_TextChanged;
+            // 
+            // txtSayHello
+            // 
+            txtSayHello.Location = new Point(103, 397);
+            txtSayHello.Name = "txtSayHello";
+            txtSayHello.Size = new Size(94, 29);
+            txtSayHello.TabIndex = 15;
+            txtSayHello.Text = "Say Hello";
+            txtSayHello.UseVisualStyleBackColor = true;
+            txtSayHello.Click += txtSayHello_Click;
+            // 
+            // errorButton
+            // 
+            errorButton.Location = new Point(256, 397);
+            errorButton.Name = "errorButton";
+            errorButton.Size = new Size(194, 29);
+            errorButton.TabIndex = 16;
+            errorButton.Text = "Break Your Code";
+            errorButton.UseVisualStyleBackColor = true;
+            errorButton.Click += errorButton_Click;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1173, 1007);
+            Controls.Add(errorButton);
+            Controls.Add(txtSayHello);
+            Controls.Add(txtConsole);
             Controls.Add(cwllthisbutton);
             Controls.Add(ForcesInputPanel);
             Controls.Add(DimensionInputPanel);
@@ -435,5 +470,8 @@ namespace ArmAnal
         private Label Label_MaxActuatorForce;
         private TextBox MaxActuatorForceInput;
         private Button cwllthisbutton;
+        private TextBox txtConsole;
+        private Button txtSayHello;
+        private Button errorButton;
     }
 }

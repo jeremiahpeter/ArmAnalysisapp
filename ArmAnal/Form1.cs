@@ -1,15 +1,32 @@
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Forms;
+
 namespace ArmAnal
 {
     public partial class Form1 : Form
     {
         private List<Button> buttons;
         private List<Panel> displayPanels;
-        
+        // custom TextWriter class
+        TextWriter _writer;
+
         public Form1()
         {
             InitializeComponent();
             buttons = new List<Button> { };
             displayPanels = new List<Panel> { ForcesInputPanel, DimensionInputPanel };
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            // Instantiate the writer
+            _writer = new TextBoxStreamWriter(txtConsole);
+            // Redirect the out Console stream
+            Console.SetOut(_writer);
+            Console.SetError(_writer);
+
+
+            Console.WriteLine("Now redirecting output to the text box");
         }
 
         private void clearDisplayPanels()
@@ -132,11 +149,6 @@ namespace ArmAnal
 
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private void Label_MaxActuatorForce_Click(object sender, EventArgs e)
         {
 
@@ -195,6 +207,25 @@ namespace ArmAnal
         private void cwllthisbutton_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void txtConsole_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtSayHello_Click(object sender, EventArgs e)
+        {
+            // Writing to the Console now causes the text to be displayed in the text box.
+            Console.WriteLine("Hello world");
+        }
+
+        private void errorButton_Click(object sender, EventArgs e)
+        {
+            if(true)
+            {
+                throw new ArgumentException("Bad code detected");
+            }
         }
     }
 }
